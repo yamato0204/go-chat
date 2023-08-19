@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    ports:
+      - 80:80
+    volumes:
+       - ./backend/:/app
