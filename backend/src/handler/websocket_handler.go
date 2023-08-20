@@ -5,13 +5,18 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/yamato0204/go-chat/src/domain"
 )
 
 
-type WebsocketHandler struct{}
+type WebsocketHandler struct{
+	hub *domain.Hub
+}
 
-func NewWebsocketHandler() *WebsocketHandler {
-	return &WebsocketHandler{}
+func NewWebsocketHandler(hub *domain.Hub) *WebsocketHandler {
+	return &WebsocketHandler{
+		hub: hub,
+	}
 }
 
 func (h *WebsocketHandler) Handle(w http.ResponseWriter, r *http.Request){
@@ -21,9 +26,15 @@ func (h *WebsocketHandler) Handle(w http.ResponseWriter, r *http.Request){
 			return true
 		},
 	}
+	
 
-	_, err := upgrader.Upgrade(w, r, nil)
+    ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	client := domain.NewClient(ws)
+	go client.ReadLoop(h.hub.BroadcastCh, h.hub.UnRegisterCh)
+	go client.WriteLoop()
+	h.hub.RegisterCh <- client
 }

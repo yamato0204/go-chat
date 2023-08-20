@@ -5,12 +5,16 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/yamato0204/go-chat/src/domain"
 	"github.com/yamato0204/go-chat/src/handler"
 )
 
 func main() {
 
-	http.HandleFunc("/ws", handler.NewWebsocketHandler().Handle)
+	hub := domain.NewHub()
+	go hub.RunLoop()
+
+	http.HandleFunc("/ws", handler.NewWebsocketHandler(hub).Handle)
 
 	port := "80"
 	log.Printf("Listening on port %s", port)
