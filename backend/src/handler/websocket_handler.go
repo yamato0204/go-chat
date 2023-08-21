@@ -23,10 +23,14 @@ func (h *WebsocketHandler) Handle(w http.ResponseWriter, r *http.Request){
 
 	upgrader := &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
-			return true
+
+			origin := r.Header.Get("Origin")
+            return origin == "http://localhost:3000"
+
+			//return true
 		},
 	}
-	
+	//origin全て許可
 
     ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
